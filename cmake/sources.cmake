@@ -155,6 +155,7 @@ function(configure_project_executable project_ref)
     VERBATIM
   )
   
+  set_target_properties(${project_ref} PROPERTIES FOLDER ${project_folder})
   install(TARGETS ${project_ref} DESTINATION ${project_root_dir}/bin)
 endfunction()
 
