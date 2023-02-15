@@ -1,4 +1,6 @@
 #include <array>
+#include <cstdint>
+#include <cstring>
 
 
 namespace gaos::memory {

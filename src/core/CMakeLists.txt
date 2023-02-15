@@ -8,7 +8,11 @@ setup_project_source(core "core"
   main.cpp
   main.h
   memory.cpp
+  memory.h
   tests.h
+)
+setup_project_source(core "allocators"
+  allocator_passthrough.h
 )
 
 # Target

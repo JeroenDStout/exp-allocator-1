@@ -1,5 +1,6 @@
-#include "version/git_version.h"
+#include "core/allocator_passthrough.h"
 #include "core/tests.h"
+#include "version/git_version.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -23,10 +24,10 @@ int main()
       << std::endl
       << "Hello doctor" << std::endl;
 
-    std::allocator<int> default_alloc_int;
+    gaos::allocators::passthrough<int> default_alloc_int;
     gaos::tests::test_vector(default_alloc_int);
     
-    std::allocator<std::pair<const int, int>> default_alloc_pair_int_int;
+    gaos::allocators::passthrough<std::pair<const int, int>> default_alloc_pair_int_int;
     gaos::tests::test_map(default_alloc_pair_int_int);
 
     return 0;

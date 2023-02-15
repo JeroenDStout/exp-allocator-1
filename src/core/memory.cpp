@@ -1,7 +1,6 @@
 #include "core/memory.h"
 
 #include <array>
-#include <cstring>
 #include <iostream>
 
 
