@@ -7,6 +7,8 @@ init_project(core "core")
 setup_project_source(core "core"
   main.cpp
   main.h
+  memory.cpp
+  tests.h
 )
 
 # Target

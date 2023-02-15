@@ -1,6 +1,9 @@
 #include "version/git_version.h"
+#include "core/tests.h"
 
 #include <iostream>
+#include <unordered_map>
+#include <vector>
 
 
 int main()
@@ -18,9 +21,13 @@ int main()
       << std::endl
       << version::get_git_history() << std::endl
       << std::endl
-      << "Hello doctor"
-      << std::endl;
+      << "Hello doctor" << std::endl;
 
-    std::cout << "Hello Doctor" << std::endl;
+    std::allocator<int> default_alloc_int;
+    gaos::tests::test_vector(default_alloc_int);
+    
+    std::allocator<std::pair<const int, int>> default_alloc_pair_int_int;
+    gaos::tests::test_map(default_alloc_pair_int_int);
+
     return 0;
 }
