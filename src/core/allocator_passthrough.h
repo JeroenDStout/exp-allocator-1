@@ -1,4 +1,5 @@
 #include "core/memory.h"
+#include "core/memory_logging.h"
 #include <iostream>
 
 
@@ -16,29 +17,20 @@ namespace gaos::allocators {
 
         value_type * allocate(std::size_t count)
         {
-            namespace gm = gaos::memory;
-
             std::size_t size = count * value_size;
+
             void * p = malloc(size);
 
-            gm::ptr_buffer buffer;
-            gm::fill_buffer_from_ptr(buffer, p);
-            std::cout
-              << "* malloc " << &buffer.front() << " " << size
-              << " (" << count << "x " << value_size << ") " << std::endl;
+            gaos::memory::log_malloc(p, size);
 
             return (value_type*)p;
         }
 
         void deallocate(value_type * p, std::size_t count) noexcept
         {
-            namespace gm = gaos::memory;
+            std::size_t size = count * value_size;
 
-            gm::ptr_buffer buffer;
-            gm::fill_buffer_from_ptr(buffer, p);
-            std::cout
-              << "*   free " << &buffer.front()
-              << " (" << count << "x)" << std::endl;
+            gaos::memory::log_free(p, size);
 
             free(p);
         }

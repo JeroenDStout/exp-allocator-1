@@ -10,6 +10,7 @@ setup_project_source(core "core"
   memory.cpp
   memory.h
   tests.h
+  memory_logging.h
 )
 setup_project_source(core "allocators"
   allocator_passthrough.h

@@ -23,26 +23,56 @@ int main()
       << version::get_compile_stamp() << std::endl
       << std::endl
       << version::get_git_history() << std::endl
-      << std::endl
-      << "Hello doctor" << std::endl;
+      << std::endl;
 
+    std::cout
+      << "## " << std::endl
+      << "## passthrough" << std::endl
+      << "##" << std::endl;
     {
+        gaos::memory::reset_meta_stats();
+
         alloc::passthrough<int> alloc_int;
         gaos::tests::test_vector(alloc_int);
+
+        gaos::memory::log_flush(true);
     
         alloc::passthrough<std::pair<const int, int>> alloc_pair_int_int;
         gaos::tests::test_map(alloc_pair_int_int);
+
+        gaos::memory::log_flush(true);
+
+        std::cout << std::endl << "---------" << std::endl;
+        gaos::memory::log_meta_stats();
+
+        std::cout << std::endl;
     }
+
+    std::cout
+      << "## " << std::endl
+      << "## stack_buffer" << std::endl
+      << "##" << std::endl;
     {
-        using stack_buffer = gaos::allocators::stack_buffer<1024>;
+        gaos::memory::reset_meta_stats();
+
+        using stack_buffer = gaos::allocators::stack_buffer<1024, gaos::allocators::passthrough<std::byte>>;
 
         stack_buffer stack_buf0, stack_buf1;
 
         alloc::stack<int, stack_buffer> alloc_int(&stack_buf0);
         gaos::tests::test_vector(alloc_int);
+
+        gaos::memory::log_flush(true);
    
         alloc::stack<std::pair<const int, int>, stack_buffer> alloc_pair_int_int(&stack_buf1);
         gaos::tests::test_map(alloc_pair_int_int);
+
+        gaos::memory::log_flush(true);
+        
+        std::cout << std::endl << "---------" << std::endl;
+        gaos::memory::log_meta_stats();
+
+        std::cout << std::endl;
     }
 
     return 0;

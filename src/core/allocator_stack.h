@@ -19,19 +19,27 @@ namespace gaos::allocators {
 
         void * allocate(std::size_t alloc_size)
         {
+            std::byte *ptr;
+
             if (next_allocation + alloc_size < &buffer.back())
             {
-                std::byte * ret = next_allocation;
+                ptr = next_allocation;
                 next_allocation += alloc_size;
-                return ret;
+            }
+            else
+            {
+                ptr = internal_allocator.allocate(alloc_size);
             }
 
-            return internal_allocator.allocate(alloc_size);
+            gaos::memory::log_allocate(ptr, alloc_size);
+            return ptr;
         }
 
 
         void deallocate(void * ptr, std::size_t alloc_size)
         {
+            gaos::memory::log_deallocate(ptr, alloc_size);
+
             if (ptr >= &buffer.front() && ptr < &buffer.back())
               return;
 
@@ -63,12 +71,6 @@ namespace gaos::allocators {
 
             std::size_t size = count * value_size;
             void * p = internal_buffer->allocate(size);
-            
-            gm::ptr_buffer buffer;
-            gm::fill_buffer_from_ptr(buffer, p);
-            std::cout
-              << "~    --> " << &buffer.front() << " " << size
-              << " (" << count << "x " << value_size << ") " << std::endl;
 
             return (value_type*)p;
         }
@@ -78,12 +80,6 @@ namespace gaos::allocators {
             namespace gm = gaos::memory;
             
             std::size_t size = count * value_size;
-
-            gm::ptr_buffer buffer;
-            gm::fill_buffer_from_ptr(buffer, p);
-            std::cout
-              << "~    <-- " << &buffer.front()
-              << " (" << count << "x)" << std::endl;
 
             internal_buffer->deallocate(p, size);
         }
