@@ -1,5 +1,7 @@
 #include "core/memory.h"
+
 #include <iostream>
+#include <limits>
 
 
 namespace gaos::allocators {
@@ -9,6 +11,8 @@ namespace gaos::allocators {
     class linear_pushpop_buffer
     {
       public:
+        using linear_pushpop_buffer_t = linear_pushpop_buffer<minimum_allocation_size, allocator_t>;
+
         struct blob_meta {
             std::uint32_t size;
             blob_meta*    next;
@@ -128,6 +132,30 @@ namespace gaos::allocators {
 
             return blob;
         }
+
+
+        struct scoped_pushpop
+        {
+            linear_pushpop_buffer_t *buffer;
+            stack_data              stack;
+
+            scoped_pushpop(linear_pushpop_buffer_t* buffer):
+              buffer(buffer),
+              stack(buffer->current_stack_data)
+            {
+            }
+
+            ~scoped_pushpop()
+            {
+                buffer->current_stack_data = stack;
+            }
+        };
+
+
+        scoped_pushpop get_scoped_pushpop()
+        {
+            return scoped_pushpop(this);
+        }
     };
 
 
@@ -165,6 +193,12 @@ namespace gaos::allocators {
             std::size_t size = count * value_size;
 
             internal_buffer->deallocate(p, size);
+        }
+
+
+        typename buffer_t::scoped_pushpop get_scoped_pushpop()
+        {
+            return internal_buffer->get_scoped_pushpop();
         }
     };
 

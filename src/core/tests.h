@@ -56,7 +56,7 @@ namespace gaos::tests {
                   << std::endl;
 
                 for (std::size_t i = 0; i < 100; i += step_size)
-                  test[(int)i] += 1;
+                  test[(int)i] += (int)i;
             }
             else
             {
@@ -72,6 +72,8 @@ namespace gaos::tests {
             gaos::memory::log_flush(true);
 
             {
+                [[maybe_unused]] auto scope_pushpop = allocator.get_scoped_pushpop();
+
                 std::cout
                   << std::endl
                   << "accumulate frequencies"

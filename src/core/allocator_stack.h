@@ -83,6 +83,12 @@ namespace gaos::allocators {
 
             internal_buffer->deallocate(p, size);
         }
+
+
+        int get_scoped_pushpop()
+        {
+            return 0;
+        }
     };
 
 

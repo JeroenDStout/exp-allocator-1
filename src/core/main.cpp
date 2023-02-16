@@ -84,20 +84,28 @@ int main()
         {
             gaos::memory::reset_meta_stats();
 
-            using pushpop_buffer = gaos::allocators::linear_pushpop_buffer<4096, gaos::allocators::passthrough<std::byte>>;
+            using pushpop_buffer = gaos::allocators::linear_pushpop_buffer<2048, gaos::allocators::passthrough<std::byte>>;
             pushpop_buffer pushpop;
 
-            alloc::linear_pushpop<int, pushpop_buffer> alloc_int(&pushpop);
-            gaos::tests::test_vector(alloc_int);
+            {
+                auto scoped_pushpop = pushpop.get_scoped_pushpop();
 
+                alloc::linear_pushpop<int, pushpop_buffer> alloc_int(&pushpop);
+                gaos::tests::test_vector(alloc_int);
+
+                gaos::memory::log_flush(true);
+            }
+            
             gaos::memory::log_flush(true);
 
-            pushpop.clear();
+            {
+                auto scoped_pushpop = pushpop.get_scoped_pushpop();
 
+                alloc::linear_pushpop<std::pair<const int, int>, pushpop_buffer> alloc_pair_int_int(&pushpop);
+                gaos::tests::test_map(alloc_pair_int_int);
+            }
+            
             gaos::memory::log_flush(true);
-   
-            alloc::linear_pushpop<std::pair<const int, int>, pushpop_buffer> alloc_pair_int_int(&pushpop);
-            gaos::tests::test_map(alloc_pair_int_int);
         }
 
         gaos::memory::log_flush(true);

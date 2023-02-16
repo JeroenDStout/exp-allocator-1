@@ -34,6 +34,12 @@ namespace gaos::allocators {
 
             free(p);
         }
+
+
+        int get_scoped_pushpop()
+        {
+            return 0;
+        }
     };
 
 
