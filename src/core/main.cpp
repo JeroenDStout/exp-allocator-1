@@ -1,3 +1,4 @@
+#include "core/allocator_linear_pushpop.h"
 #include "core/allocator_passthrough.h"
 #include "core/allocator_stack.h"
 #include "core/tests.h"
@@ -69,6 +70,38 @@ int main()
 
         gaos::memory::log_flush(true);
         
+        std::cout << std::endl << "---------" << std::endl;
+        gaos::memory::log_meta_stats();
+
+        std::cout << std::endl;
+    }
+
+    std::cout
+      << "## " << std::endl
+      << "## linear_pushpop" << std::endl
+      << "##" << std::endl;
+    {
+        {
+            gaos::memory::reset_meta_stats();
+
+            using pushpop_buffer = gaos::allocators::linear_pushpop_buffer<4096, gaos::allocators::passthrough<std::byte>>;
+            pushpop_buffer pushpop;
+
+            alloc::linear_pushpop<int, pushpop_buffer> alloc_int(&pushpop);
+            gaos::tests::test_vector(alloc_int);
+
+            gaos::memory::log_flush(true);
+
+            pushpop.clear();
+
+            gaos::memory::log_flush(true);
+   
+            alloc::linear_pushpop<std::pair<const int, int>, pushpop_buffer> alloc_pair_int_int(&pushpop);
+            gaos::tests::test_map(alloc_pair_int_int);
+        }
+
+        gaos::memory::log_flush(true);
+
         std::cout << std::endl << "---------" << std::endl;
         gaos::memory::log_meta_stats();
 
