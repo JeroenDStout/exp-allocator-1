@@ -38,7 +38,7 @@ namespace gaos::tests {
     {
         std::cout
           << std::endl
-          << "std::unordered_map<int, int> (2x)"
+          << "std::unordered_map<int, int>"
           << std::endl;
 
         std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, allocator_t> test(allocator);
