@@ -84,7 +84,7 @@ int main()
         {
             gaos::memory::reset_meta_stats();
 
-            using pushpop_buffer = gaos::allocators::linear_pushpop_buffer<2048, gaos::allocators::passthrough<std::byte>>;
+            using pushpop_buffer = gaos::allocators::linear_pushpop_buffer<2 << 14, gaos::allocators::passthrough<std::byte>>;
             pushpop_buffer pushpop;
 
             {

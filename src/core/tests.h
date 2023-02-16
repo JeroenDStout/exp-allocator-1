@@ -42,7 +42,6 @@ namespace gaos::tests {
           << std::endl;
 
         std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, allocator_t> test(allocator);
-        std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, allocator_t> accumulate(allocator);
 
         gaos::memory::log_flush(true);
 
@@ -55,7 +54,7 @@ namespace gaos::tests {
                   << "increment multiples of " << step_size
                   << std::endl;
 
-                for (std::size_t i = 0; i < 100; i += step_size)
+                for (std::size_t i = 0; i < 1000; i += step_size)
                   test[(int)i] += (int)i;
             }
             else
@@ -65,7 +64,7 @@ namespace gaos::tests {
                   << "remove multiples of " << step_size
                   << std::endl;
 
-                for (std::size_t i = 0; i < 100; i += step_size)
+                for (std::size_t i = 0; i < 1000; i += step_size)
                   test.erase((int)i);
             }
 
@@ -73,6 +72,8 @@ namespace gaos::tests {
 
             {
                 [[maybe_unused]] auto scope_pushpop = allocator.get_scoped_pushpop();
+
+                std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, allocator_t> accumulate(allocator);
 
                 std::cout
                   << std::endl

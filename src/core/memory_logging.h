@@ -38,10 +38,10 @@ namespace gaos::memory {
     inline void log_meta_stats()
     {
         std::cout
-          << "malloc " << std::setw(4) << count_malloc << "x "
-          << "free " << std::setw(4) << count_malloc << "x "
-          << "| now " << std::setw(4) << size_malloc_cur
-          << " peak " << std::setw(4) << size_malloc_peak << std::endl;
+          << "malloc " << std::setw(6) << count_malloc << "x "
+          << "free " << std::setw(6) << count_malloc << "x "
+          << "| now " << std::setw(6) << size_malloc_cur
+          << " peak " << std::setw(6) << size_malloc_peak << std::endl;
     }
 
 
@@ -69,7 +69,7 @@ namespace gaos::memory {
         }
 
         std::cout
-          << " " << std::setw(4) << info.repeat << "x " << std::setw(4) << info.size << " (" << std::setw(6) << (info.repeat * info.size) << ")" << std::endl;
+          << " " << std::setw(6) << info.repeat << "x " << std::setw(6) << info.size << " (" << std::setw(8) << (info.repeat * info.size) << ")" << std::endl;
     }
 
 
