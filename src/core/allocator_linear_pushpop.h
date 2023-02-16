@@ -84,13 +84,13 @@ namespace gaos::allocators {
             std::uint32_t alloc_size = (std::uint32_t)alloc_size_;
 
             for (;;) {
-                if (current_stack_data.offset + alloc_size < current_stack_data.blob->size) {
+                if (current_stack_data.offset + alloc_size <= current_stack_data.blob->size) {
                     ptr = (std::byte*)(current_stack_data.blob) + current_stack_data.offset;
                     current_stack_data.offset += alloc_size;
                     break;
                 }
 
-                if (alloc_size + blob_meta_size > minimum_allocation_size) {
+                if (current_stack_data.offset == blob_meta_size && alloc_size + blob_meta_size > minimum_allocation_size) {
                     blob_meta *insert_blob = alloc_buffer(current_stack_data.blob->previous, alloc_size + blob_meta_size);
                     current_stack_data.blob->previous = insert_blob;
                     insert_blob->next = current_stack_data.blob;
