@@ -87,9 +87,9 @@ namespace gaos::allocators {
 
 
     template <class T, class U, class buffer_t>
-    bool operator==(stack<T, buffer_t> const&, stack<U, buffer_t> const&) noexcept
+    bool operator==(stack<T, buffer_t> const& lh, stack<U, buffer_t> const& rh) noexcept
     {
-        return true;
+        return lh.internal_buffer == rh.internal_buffer;
     }
 
 
