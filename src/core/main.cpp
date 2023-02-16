@@ -1,6 +1,7 @@
 #include "core/allocator_linear_pushpop.h"
 #include "core/allocator_passthrough.h"
 #include "core/allocator_stack.h"
+#include "core/allocator_ptr.h"
 #include "core/tests.h"
 #include "version/git_version.h"
 
@@ -84,13 +85,13 @@ int main()
         {
             gaos::memory::reset_meta_stats();
 
-            using pushpop_buffer = gaos::allocators::linear_pushpop_buffer<2 << 14, gaos::allocators::passthrough<std::byte>>;
-            pushpop_buffer pushpop;
+            using linear_pushpop = gaos::allocators::linear_pushpop<2 << 14, gaos::allocators::passthrough<std::byte>>;
+            linear_pushpop pushpop;
 
             {
                 auto scoped_pushpop = pushpop.get_scoped_pushpop();
 
-                alloc::linear_pushpop<int, pushpop_buffer> alloc_int(&pushpop);
+                alloc::ptr<int, linear_pushpop> alloc_int(&pushpop);
                 gaos::tests::test_vector(alloc_int);
 
                 gaos::memory::log_flush(true);
@@ -101,7 +102,7 @@ int main()
             {
                 auto scoped_pushpop = pushpop.get_scoped_pushpop();
 
-                alloc::linear_pushpop<std::pair<const int, int>, pushpop_buffer> alloc_pair_int_int(&pushpop);
+                alloc::ptr<std::pair<const int, int>, linear_pushpop> alloc_pair_int_int(&pushpop);
                 gaos::tests::test_map(alloc_pair_int_int);
             }
             
