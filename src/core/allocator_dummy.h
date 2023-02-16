@@ -42,6 +42,12 @@ namespace gaos::allocators {
             gaos::memory::log_deallocate(ptr, alloc_size);
             internal_allocator.deallocate(ptr, alloc_size);
         }
+
+
+        auto get_scoped_pushpop()
+        {
+            return 0;
+        }
     };
 
 }

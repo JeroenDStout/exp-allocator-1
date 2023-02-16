@@ -1,7 +1,8 @@
 #include "core/allocator_linear_pushpop.h"
 #include "core/allocator_passthrough.h"
-#include "core/allocator_stack.h"
 #include "core/allocator_ptr.h"
+#include "core/allocator_reuse.h"
+#include "core/allocator_stack.h"
 #include "core/tests.h"
 #include "version/git_version.h"
 
@@ -79,13 +80,50 @@ int main()
 
     std::cout
       << "## " << std::endl
+      << "## reuse" << std::endl
+      << "##" << std::endl;
+    {
+        {
+            gaos::memory::reset_meta_stats();
+
+            constexpr std::size_t node_size =
+            #ifdef _MSC_VER
+              24;
+            #else
+              sizeof(std::unordered_map<const int, int>::node_type);
+            #endif
+            
+            using reuse = gaos::allocators::reuse<node_size, gaos::allocators::passthrough<std::byte>>;
+            reuse reuse_allocator;
+
+            alloc::ptr<int, reuse> alloc_int(&reuse_allocator);
+            gaos::tests::test_vector(alloc_int);
+
+            gaos::memory::log_flush(true);
+
+            alloc::ptr<std::pair<const int, int>, reuse> alloc_pair_int_int(&reuse_allocator);
+            gaos::tests::test_map(alloc_pair_int_int);
+            
+            gaos::memory::log_flush(true);
+        }
+
+        gaos::memory::log_flush(true);
+
+        std::cout << std::endl << "---------" << std::endl;
+        gaos::memory::log_meta_stats();
+
+        std::cout << std::endl;
+    }
+
+    std::cout
+      << "## " << std::endl
       << "## linear_pushpop" << std::endl
       << "##" << std::endl;
     {
         {
             gaos::memory::reset_meta_stats();
 
-            using linear_pushpop = gaos::allocators::linear_pushpop<2 << 14, gaos::allocators::passthrough<std::byte>>;
+            using linear_pushpop = gaos::allocators::linear_pushpop<1 << 16, gaos::allocators::passthrough<std::byte>>;
             linear_pushpop pushpop;
 
             {
