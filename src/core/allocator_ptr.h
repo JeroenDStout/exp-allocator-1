@@ -8,60 +8,75 @@
 namespace gaos::allocators {
 
 
-    template <class T, class buffer_t>
+    // Use an allocator referenced by pointer to do the internal
+    // allocations: this is needed to have multiple containers all
+    // use the same memory
+    // Note that this expects to get an allocator which allocates bytes
+    template <class T, class internal_allocator_t>
     class ptr
     {
     public:
+      // -- Types
+
+        using this_type  = ptr<T, internal_allocator_t>;
         using value_type = T;
         static constexpr std::size_t value_size = sizeof(value_type);
+        
+      // -- Members
 
-        buffer_t * internal_buffer;
+        // The internal allocator that does all the actual allocations
+        internal_allocator_t *internal_allocator;
 
-        ptr(buffer_t * buffer) noexcept:
-          internal_buffer(buffer)
-        {}
+      // -- Construction
 
-        template <class U> ptr(ptr<U, buffer_t> const &rh) noexcept:
-          internal_buffer(rh.internal_buffer)
-        {}
+        ptr(internal_allocator_t *allocator) noexcept
+        : internal_allocator(allocator) {}
 
-        value_type * allocate(std::size_t count)
-        {
-            namespace gm = gaos::memory;
+        template <class U> ptr(ptr<U, internal_allocator_t> const &rh) noexcept
+        : internal_allocator(rh.internal_allocator) {}
 
+      // -- Allocation
+
+        auto allocate(std::size_t count) noexcept -> value_type * {
+            // Allocate memory for (count × value_type)
             std::size_t size = count * value_size;
-            void * p = internal_buffer->allocate(size);
 
+            // We just pass through to the internal allocator
+            // Note we do not log, as we literally do not do
+            // any contributions to the allocation
+            void * p = internal_allocator->allocate(size);
             return (value_type*)p;
         }
 
-        void deallocate(value_type * p, std::size_t count) noexcept
-        {
-            namespace gm = gaos::memory;
-            
-            std::size_t size = count * value_size;
 
-            internal_buffer->deallocate(p, size);
+        void deallocate(value_type * p, std::size_t count) noexcept {
+            // Allocate memory for (count × value_type)
+            std::size_t size = count * value_size;
+            
+            // We just pass through to the internal allocator
+            // Note we do not log, as we literally do not do
+            // any contributions to the deallocation
+            internal_allocator->deallocate(p, size);
         }
 
-
-        auto get_scoped_pushpop()
-        {
-            return internal_buffer->get_scoped_pushpop();
+        
+        // Some allocators in this project can be scoped;
+        // We pass this scoped pushpop request through too
+        auto get_scoped_pushpop() noexcept {
+            return internal_allocator->get_scoped_pushpop();
         }
     };
 
+  // -- Operators
 
-    template <class T, class U, class buffer_t>
-    bool operator==(ptr<T, buffer_t> const& lh, ptr<U, buffer_t> const& rh) noexcept
-    {
-        return lh.internal_buffer == rh.internal_buffer;
+    template <class T, class U, class internal_allocator_t>
+    bool operator==(ptr<T, internal_allocator_t> const& lh, ptr<U, internal_allocator_t> const& rh) noexcept {
+        return lh.internal_allocator == rh.internal_allocator;
     }
 
 
-    template <class T, class U, class buffer_t>
-    bool operator!=(ptr<T, buffer_t> const& lh, ptr<U, buffer_t> const& rh) noexcept
-    {
+    template <class T, class U, class internal_allocator_t>
+    bool operator!=(ptr<T, internal_allocator_t> const& lh, ptr<U, internal_allocator_t> const& rh) noexcept {
         return !(lh == rh);
     }
 
