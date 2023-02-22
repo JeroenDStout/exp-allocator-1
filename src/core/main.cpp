@@ -32,6 +32,7 @@ int main()
       << "## " << std::endl
       << "## passthrough" << std::endl
       << "##" << std::endl;
+
     {
         gaos::memory::reset_meta_stats();
 
@@ -55,6 +56,7 @@ int main()
       << "## " << std::endl
       << "## stack_buffer" << std::endl
       << "##" << std::endl;
+
     {
         gaos::memory::reset_meta_stats();
 
@@ -82,6 +84,7 @@ int main()
       << "## " << std::endl
       << "## reuse" << std::endl
       << "##" << std::endl;
+
     {
         {
             gaos::memory::reset_meta_stats();
@@ -119,6 +122,7 @@ int main()
       << "## " << std::endl
       << "## linear_pushpop" << std::endl
       << "##" << std::endl;
+
     {
         {
             gaos::memory::reset_meta_stats();

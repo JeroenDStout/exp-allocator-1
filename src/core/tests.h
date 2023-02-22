@@ -5,6 +5,8 @@
 
 namespace gaos::tests {
 
+
+    // Simply fill a vector step-by-step
     template<typename allocator_t>
     inline void test_vector(allocator_t& allocator)
     {
@@ -33,6 +35,11 @@ namespace gaos::tests {
           << std::endl;
     }
 
+    
+    // Over multiple loops, fill an unordered_map with values,
+    // then remove multiples of N, add multiples of N+1, etc
+    // Every step collect them in a sub-step -- this represents
+    // the generally messed up stuff that goes on with maps
     template<typename allocator_t>
     inline void test_map(allocator_t& allocator)
     {
@@ -45,10 +52,8 @@ namespace gaos::tests {
 
         gaos::memory::log_flush(true);
 
-        for (std::size_t step_size = 1; step_size <= 10; ++step_size)
-        {
-            if (step_size % 2 == 1)
-            {
+        for (std::size_t step_size = 1; step_size <= 10; ++step_size) {
+            if (step_size % 2 == 1) {
                 std::cout
                   << std::endl
                   << "increment multiples of " << step_size
@@ -57,8 +62,7 @@ namespace gaos::tests {
                 for (std::size_t i = 0; i < 1000; i += step_size)
                   test[(int)i] += (int)i;
             }
-            else
-            {
+            else {
                 std::cout
                   << std::endl
                   << "remove multiples of " << step_size
@@ -71,6 +75,8 @@ namespace gaos::tests {
             gaos::memory::log_flush(true);
 
             {
+                // This inner step is a prime candidate for a push-pop
+                // as its allocations never leave this scope
                 [[maybe_unused]] auto scope_pushpop = allocator.get_scoped_pushpop();
 
                 std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, allocator_t> accumulate(allocator);
