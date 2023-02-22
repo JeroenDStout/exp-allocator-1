@@ -6,9 +6,7 @@ init_project(core "core")
 # Sources static
 setup_project_source(core "core"
   main.cpp
-  main.h
   memory.cpp
-  memory.h
   tests.h
   memory_logging.h
 )

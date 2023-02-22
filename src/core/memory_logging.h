@@ -8,32 +8,21 @@
 
 namespace gaos::memory {
 
-    enum class allocation_type {
-        malloc,
-        free,
-        allocate,
-        deallocate,
-        malloc_allocate,
-        free_deallocate
-    };
+    // Convenience data for turning a ptr into a hex string
+    // without doing dynamic allocations (seeing as that is
+    // what we are testing!)
+    constexpr std::size_t ptr_byte_count = sizeof(void*);
+    using ptr_buffer = std::array<char, ptr_byte_count*2 + 3>;
+    auto int_hex(std::size_t v) -> char;
+    void fill_buffer_from_ptr(ptr_buffer &out_buffer, void const *ptr);
 
-    struct allocation_info {
-        allocation_type  type;
-        void            *address;
-        std::size_t      size;
-        std::size_t      repeat;
-    };
-    
-    static constexpr std::size_t                      log_info_size = 4;
-    static std::array<allocation_info, log_info_size> log_info;
-    static std::size_t                                log_info_read_idx  = 0;
-    static std::size_t                                log_info_write_idx = 0;
-    
+  // -- Meta stats
+
+    // Global memory allocation stats
     static std::size_t count_malloc     = 0;
     static std::size_t count_free       = 0;
     static std::size_t size_malloc_cur  = 0;
     static std::size_t size_malloc_peak = 0;
-
 
     inline void log_meta_stats()
     {
@@ -53,13 +42,41 @@ namespace gaos::memory {
         size_malloc_peak = 0;
     }
 
+  // -- Main logging
 
-    inline void log(const allocation_info& info)
-    {
+    // For logging purposes, the different types of allocations
+    enum class allocation_type {
+        malloc,
+        free,
+        allocate,
+        deallocate,
+        malloc_allocate,
+        free_deallocate
+    };
+
+
+    // An individual 'step' of allocation, which can represent
+    // a single allocation, or a collected repeated sequence
+    struct allocation_info {
+        allocation_type  type;
+        void            *address;
+        std::size_t      size;
+        std::size_t      repeat;
+    };
+    
+
+    // Log info data - we store a little ring buffer with allocations
+    // that we try to compact, and log when it becomes full
+    static constexpr std::size_t                      log_info_size = 4;
+    static std::array<allocation_info, log_info_size> log_info;
+    static std::size_t                                log_info_read_idx  = 0;
+    static std::size_t                                log_info_write_idx = 0;
+
+
+    inline void log(const allocation_info& info) {
         namespace gm = gaos::memory;
 
-        switch (info.type)
-        {
+        switch (info.type) {
             case allocation_type::malloc:          std::cout << "* malloc            "; break;
             case allocation_type::free:            std::cout << "*  free             "; break;
             case allocation_type::allocate:        std::cout << "*         allocate  "; break;
@@ -73,8 +90,10 @@ namespace gaos::memory {
     }
 
 
+    // Take two allocation steps, and try to merge them left-to-right
     inline bool log_try_collapse_lh_to_rh(allocation_info &info_lh, allocation_info &info_rh)
     {
+        // Merge if allocations are same type and size
         if (   info_lh.type == info_rh.type
             && info_lh.size == info_rh.size)
         {
@@ -85,12 +104,16 @@ namespace gaos::memory {
         return false;
     }
 
-
+    
+    // Take two allocation steps, and try to merge them right-to-left
+    // This merges into malloc-and-allocate and deallocate-and-free
     inline bool log_try_collapse_rh_to_lh(allocation_info &info_lh, allocation_info &info_rh)
     {
+        // Repeated entries can never be merged
         if (info_lh.repeat > 1)
           return false;
-
+          
+        // A malloc followed by an allocate at the same ptr is combined
         if (   info_lh.type == allocation_type::malloc
             && info_rh.type == allocation_type::allocate
             && info_rh.address == info_lh.address)
@@ -98,7 +121,8 @@ namespace gaos::memory {
             info_lh.type = allocation_type::malloc_allocate;
             return true;
         }
-
+        
+        // A deallocate followed by a free at the same ptr is combined
         if (   info_lh.type == allocation_type::deallocate
             && info_rh.type == allocation_type::free
             && info_rh.address == info_lh.address)
@@ -116,11 +140,11 @@ namespace gaos::memory {
         // While there are 2 or more entries,
         // try to collapse them from right to left
         while (log_info_read_idx + 1 < log_info_write_idx) {
-            if (log_try_collapse_rh_to_lh(
-                   log_info[(log_info_write_idx-2) % log_info_size],
-                   log_info[(log_info_write_idx-1) % log_info_size]
-               )
-            ) {
+            if (
+              log_try_collapse_rh_to_lh(
+                log_info[(log_info_write_idx-2) % log_info_size],
+                log_info[(log_info_write_idx-1) % log_info_size]
+            )) {
                 --log_info_write_idx;
                 continue;
             }
@@ -138,12 +162,12 @@ namespace gaos::memory {
             if (!force && log_info_write_idx - log_info_read_idx < log_info_size)
               break;
 
-            if (   log_info_read_idx + 1 < log_info_write_idx 
-                && log_try_collapse_lh_to_rh(
-                     log_info[(log_info_read_idx+0) % log_info_size],
-                     log_info[(log_info_read_idx+1) % log_info_size]
-                   ))
-            {
+            if (
+              log_info_read_idx + 1 < log_info_write_idx 
+              && log_try_collapse_lh_to_rh(
+                   log_info[(log_info_read_idx+0) % log_info_size],
+                   log_info[(log_info_read_idx+1) % log_info_size]
+            )) {
                 ++log_info_read_idx;
                 continue;
             }
@@ -211,5 +235,35 @@ namespace gaos::memory {
 
         log_flush(false);
     }
+
+
+    // Turn 4 bits of data into a hex
+    inline char int_hex(std::size_t v)
+    {
+        std::uint8_t clean_v = std::uint8_t(v & 0xF);
+        return (clean_v < 10) ? '0' + clean_v : 'A' + (clean_v-10);
+    }
+
+
+    // Fill a buffer with a 0x-- ptr address
+    inline void fill_buffer_from_ptr(ptr_buffer &out_buffer, void const * ptr)
+    {
+        char *write = &out_buffer.front();
+
+        *(write++) = '0';
+        *(write++) = 'x';
+    
+        std::size_t ptr_int;
+        std::memcpy(&ptr_int, &ptr, sizeof(std::size_t));
+
+        for (std::size_t i = 0; i < ptr_byte_count; ++i)
+        {
+            *(write++) = int_hex(ptr_int >> ((8 * (ptr_byte_count - 1 - i)) + 0));
+            *(write++) = int_hex(ptr_int >> ((8 * (ptr_byte_count - 1 - i)) + 4));
+        }
+
+        *(write++) = 0;
+    }
+
 
 }
