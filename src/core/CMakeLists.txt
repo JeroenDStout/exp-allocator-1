@@ -13,7 +13,7 @@ setup_project_source(core "core"
   memory_logging.h
 )
 setup_project_source(core "allocators"
-  allocator_passthrough.h
+  allocator_libc.h
   allocator_stack.h
   allocator_linear_pushpop.h
   allocator_reuse.h

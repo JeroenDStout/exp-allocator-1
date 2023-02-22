@@ -1,5 +1,5 @@
+#include "core/allocator_libc.h"
 #include "core/allocator_linear_pushpop.h"
-#include "core/allocator_passthrough.h"
 #include "core/allocator_ptr.h"
 #include "core/allocator_reuse.h"
 #include "core/allocator_stack.h"
