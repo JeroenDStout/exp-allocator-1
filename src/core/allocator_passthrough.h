@@ -8,44 +8,53 @@
 namespace gaos::allocators {
 
 
+    // Use an internal allocator for allocation -- all the credit, none of the work!
+    // Useful template for creating smarter allocators, as backing
+    // one allocator by another allows for a lot of utility
+    // Note that this expects to get an allocator which allocates bytes
     template<typename allocator_t = std::allocator<std::byte>>
-    class dummy
+    class passthrough
     {
       public:
+        // We use an internal allocator for all our allocations
         allocator_t internal_allocator;
 
-        dummy(allocator_t allocator = {}) noexcept:
-          internal_allocator(allocator)
-        {
+      // -- Construction
+
+        passthrough(allocator_t allocator = {}) noexcept
+        : internal_allocator(allocator) {
         }
 
-        ~dummy() noexcept
-        {
+        ~passthrough() noexcept {
             clear();
         }
 
+      // -- Allocation
 
-        void clear() noexcept
-        {
+        void clear() noexcept {
+            // If we did internal memory management,
+            // this is where would clean it up
         }
 
-        void * allocate(std::size_t alloc_size)
-        {
+        auto allocate(std::size_t alloc_size) noexcept -> std::byte * {
+            // Let the internal allocator do the work
             std::byte *ptr = internal_allocator.allocate(alloc_size);
             gaos::memory::log_allocate(ptr, alloc_size);
             return ptr;
         }
 
 
-        void deallocate(void * ptr, std::size_t alloc_size)
-        {
+        void deallocate(void * ptr, std::size_t alloc_size) noexcept {
+            // Let the internal allocator do the work
             gaos::memory::log_deallocate(ptr, alloc_size);
             internal_allocator.deallocate(ptr, alloc_size);
         }
+        
 
-
-        auto get_scoped_pushpop()
-        {
+        // Some allocators in this project can be scoped and
+        // will return something sensible; this allocator does
+        // not, and so just returns a dummy int
+        auto get_scoped_pushpop() noexcept -> int {
             return 0;
         }
     };
