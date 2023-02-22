@@ -17,7 +17,7 @@ setup_project_source(core "allocators"
   allocator_stack.h
   allocator_linear_pushpop.h
   allocator_reuse.h
-  allocator_dummy.h
+  allocator_passthrough.h
   allocator_ptr.h
 )
 
