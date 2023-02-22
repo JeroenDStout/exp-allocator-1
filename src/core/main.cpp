@@ -58,16 +58,16 @@ int main()
     {
         gaos::memory::reset_meta_stats();
 
-        using stack_buffer = gaos::allocators::stack_buffer<1024, gaos::allocators::libc<std::byte>>;
+        using stack = gaos::allocators::stack<1024, gaos::allocators::libc<std::byte>>;
 
-        stack_buffer stack_buf0, stack_buf1;
+        stack stack_buf0, stack_buf1;
 
-        alloc::stack<int, stack_buffer> alloc_int(&stack_buf0);
+        alloc::ptr<int, stack> alloc_int(&stack_buf0);
         gaos::tests::test_vector(alloc_int);
 
         gaos::memory::log_flush(true);
    
-        alloc::stack<std::pair<const int, int>, stack_buffer> alloc_pair_int_int(&stack_buf1);
+        alloc::ptr<std::pair<const int, int>, stack> alloc_pair_int_int(&stack_buf1);
         gaos::tests::test_map(alloc_pair_int_int);
 
         gaos::memory::log_flush(true);
