@@ -35,12 +35,12 @@ int main()
     {
         gaos::memory::reset_meta_stats();
 
-        alloc::passthrough<int> alloc_int;
+        alloc::libc<int> alloc_int;
         gaos::tests::test_vector(alloc_int);
 
         gaos::memory::log_flush(true);
     
-        alloc::passthrough<std::pair<const int, int>> alloc_pair_int_int;
+        alloc::libc<std::pair<const int, int>> alloc_pair_int_int;
         gaos::tests::test_map(alloc_pair_int_int);
 
         gaos::memory::log_flush(true);
@@ -58,7 +58,7 @@ int main()
     {
         gaos::memory::reset_meta_stats();
 
-        using stack_buffer = gaos::allocators::stack_buffer<1024, gaos::allocators::passthrough<std::byte>>;
+        using stack_buffer = gaos::allocators::stack_buffer<1024, gaos::allocators::libc<std::byte>>;
 
         stack_buffer stack_buf0, stack_buf1;
 
@@ -93,7 +93,7 @@ int main()
               sizeof(std::unordered_map<const int, int>::node_type);
             #endif
             
-            using reuse = gaos::allocators::reuse<node_size, gaos::allocators::passthrough<std::byte>>;
+            using reuse = gaos::allocators::reuse<node_size, gaos::allocators::libc<std::byte>>;
             reuse reuse_allocator;
 
             alloc::ptr<int, reuse> alloc_int(&reuse_allocator);
@@ -123,7 +123,7 @@ int main()
         {
             gaos::memory::reset_meta_stats();
 
-            using linear_pushpop = gaos::allocators::linear_pushpop<1 << 16, gaos::allocators::passthrough<std::byte>>;
+            using linear_pushpop = gaos::allocators::linear_pushpop<1 << 16, gaos::allocators::libc<std::byte>>;
             linear_pushpop pushpop;
 
             {
