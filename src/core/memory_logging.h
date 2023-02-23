@@ -45,6 +45,8 @@ namespace gaos::memory {
 
   // -- Main logging
 
+    static bool enable_logging = false;
+
     // For logging purposes, the different types of allocations
     enum class allocation_type {
         malloc,
@@ -181,6 +183,13 @@ namespace gaos::memory {
 
     inline void log_malloc(void * addr, std::size_t size)
     {
+        count_malloc     += 1;
+        size_malloc_cur  += size;
+        size_malloc_peak  = std::max(size_malloc_peak, size_malloc_cur);
+
+        if (!enable_logging)
+          return;
+
         auto& info = log_info[log_info_write_idx++ % log_info_size];
 
         info.type    = allocation_type::malloc;
@@ -188,16 +197,18 @@ namespace gaos::memory {
         info.size    = size;
         info.repeat  = 1;
 
-        count_malloc     += 1;
-        size_malloc_cur  += size;
-        size_malloc_peak  = std::max(size_malloc_peak, size_malloc_cur);
-
         log_flush(false);
     }
 
 
     inline void log_free(void * addr, std::size_t size)
     {
+        count_free      += 1;
+        size_malloc_cur -= size;
+
+        if (!enable_logging)
+          return;
+
         auto& info = log_info[log_info_write_idx++ % log_info_size];
 
         info.type    = allocation_type::free;
@@ -205,15 +216,15 @@ namespace gaos::memory {
         info.size    = size;
         info.repeat  = 1;
 
-        count_free      += 1;
-        size_malloc_cur -= size;
-
         log_flush(false);
     }
 
 
     inline void log_allocate(void * addr, std::size_t size)
     {
+        if (!enable_logging)
+          return;
+
         auto& info = log_info[log_info_write_idx++ % log_info_size];
 
         info.type    = allocation_type::allocate;
@@ -227,6 +238,9 @@ namespace gaos::memory {
 
     inline void log_deallocate(void * addr, std::size_t size)
     {
+        if (!enable_logging)
+          return;
+
         auto& info = log_info[log_info_write_idx++ % log_info_size];
 
         info.type    = allocation_type::deallocate;
