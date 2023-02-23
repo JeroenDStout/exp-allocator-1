@@ -11,22 +11,14 @@
 #include <vector>
 
 
-int main()
+void main_speed_test()
+{
+}
+
+
+void main_long_log()
 {
     namespace alloc   = gaos::allocators;
-    namespace version = gaos::version;
-
-    std::cout
-      << std::endl
-      << "          * * * * * * * * * * * * * * * * * " << std::endl
-      << "         * * * Allocator Experiment I  * * * " << std::endl
-      << "          * * * * * * * * * * * * * * * * * " << std::endl
-      << std::endl
-      << version::get_git_essential_version() << std::endl
-      << version::get_compile_stamp() << std::endl
-      << std::endl
-      << version::get_git_history() << std::endl
-      << std::endl;
 
     std::cout
       << "## " << std::endl
@@ -158,6 +150,26 @@ int main()
 
         std::cout << std::endl;
     }
+}
+
+
+int main()
+{
+    namespace version = gaos::version;
+
+    std::cout
+      << std::endl
+      << "          * * * * * * * * * * * * * * * * * " << std::endl
+      << "         * * * Allocator Experiment I  * * * " << std::endl
+      << "          * * * * * * * * * * * * * * * * * " << std::endl
+      << std::endl
+      << version::get_git_essential_version() << std::endl
+      << version::get_compile_stamp() << std::endl
+      << std::endl
+      << version::get_git_history() << std::endl
+      << std::endl;
+
+    main_speed_test();
 
     return 0;
 }
