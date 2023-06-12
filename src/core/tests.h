@@ -28,7 +28,7 @@ namespace gaos::tests {
               << std::endl;
         }
 
-        for (int i = 0; i < 50; ++i)
+        for (int i = 0; i < 500; ++i)
           test.push_back(i);
 
         gaos::memory::log_flush(true);
